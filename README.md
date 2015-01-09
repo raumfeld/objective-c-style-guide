@@ -1,8 +1,8 @@
-# NYTimes Objective-C Style Guide
+# Raumfeld Objective-C Style Guide
 
-This style guide outlines the coding conventions of the iOS team at The New York Times. We welcome your feedback in [issues](https://github.com/NYTimes/objetive-c-style-guide/issues), [pull requests](https://github.com/NYTimes/objetive-c-style-guide/pulls) and [tweets](https://twitter.com/nytimesmobile). Also, [we're hiring](http://jobs.nytco.com/job/New-York-iOS-Developer-Job-NY/2572221/).
+This style guide outlines the coding conventions of the iOS team at Raumfeld, based on the great [New York Times objective-c style guide](https://github.com/NYTimes/objetive-c-style-guide).
 
-Thanks to all of [our contributors](https://github.com/NYTimes/objective-c-style-guide/contributors).
+Thanks to all of [contributors](https://github.com/NYTimes/objective-c-style-guide/contributors).
 
 ## Introduction
 
@@ -56,15 +56,17 @@ UIApplication.sharedApplication.delegate;
 ## Spacing
 
 * Indent using 4 spaces. Never indent with tabs. Be sure to set this preference in Xcode.
-* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the same line as the statement but close on a new line.
+* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the next line than the statement but and on a new line.
 
 **For example:**
 ```objc
-if (user.isHappy) {
-//Do something
+if (user.isHappy) 
+{
+    //Do something
 }
-else {
-//Do something else
+else
+{
+    //Do something else
 }
 ```
 * There should be exactly one blank line between methods to aid in visual clarity and organization. Whitespace within methods should separate functionality, but often there should probably be new methods.
@@ -166,7 +168,7 @@ Property definitions should be used in place of naked instance variables wheneve
 
 #### Variable Qualifiers
 
-When it comes to the variable qualifiers [introduced with ARC](https://developer.apple.com/library/ios/releasenotes/objectivec/rn-transitioningtoarc/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226-CH1-SW4), the qualifier (`__strong`, `__weak`, `__unsafe_unretained`, `__autoreleasing`) should be placed between the asterisks and the variable name, e.g., `NSString * __weak text`. 
+When it comes to the variable qualifiers [introduced with ARC](https://developer.apple.com/library/ios/releasenotes/objectivec/rn-transitioningtoarc/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226-CH1-SW4), the qualifier (`__strong`, `__weak`, `__unsafe_unretained`, `__autoreleasing`) should be placed *in front of the variable* type, e.g., `__weak NSString *text`. 
 
 ## Naming
 
@@ -186,12 +188,12 @@ UIButton *settingsButton;
 UIButton *setBut;
 ```
 
-A three letter prefix (e.g. `NYT`) should always be used for class names and constants, however may be omitted for Core Data entity names. Constants should be camel-case with all words capitalized and prefixed by the related class name for clarity.
+A prefix (e.g. `RF`) should always be used for class names. Constants should be prefixed additionally with a lowercase `k`. Prefixes may be omitted for Core Data entity names. Constants should be camel-case with all words capitalized and prefixed by the related class name for clarity.
 
 **For example:**
 
 ```objc
-static const NSTimeInterval NYTArticleViewControllerNavigationFadeAnimationDuration = 0.3;
+static const NSTimeInterval kRFAlbumViewControllerNavigationFadeAnimationDuration = 0.3;
 ```
 
 **Not:**
@@ -224,20 +226,43 @@ Block comments should generally be avoided, as code should be as self-documentin
 
 ## init and dealloc
 
-`dealloc` methods should be placed at the top of the implementation, directly after the `@synthesize` and `@dynamic` statements. `init` should be placed directly below the `dealloc` methods of any class.
+`init` methods should be placed at the top of the implementation, directly after the `@synthesize` and `@dynamic` statements. `dealloc` should be placed directly below the `init` methods of any class.
 
 `init` methods should be structured like this:
 
 ```objc
-- (instancetype)init {
-    self = [super init]; // or call the designated initializer
-    if (self) {
+- (instancetype)init 
+{    
+    if ((self = [super initDesignatedInitializer]))
+    {
         // Custom initialization
     }
 
     return self;
 }
 ```
+
+The designated initializer should be marked with the `NS_DESIGNATED_INITIALIZER` attribute in the header.
+
+**Example:**
+
+```objc
+- (instancetype) initWithName: (NSString *) name NS_DESIGNATED_INITIALIZER;
+```
+
+If  `NS_DESIGNATED_INITIALIZER` is not available (iOS < 8), you may redefine it for the project:
+
+```objc
+// Re-Adds NS_DESIGNATED_INITIALIZER macro, see https://gist.github.com/steipete/9482253
+#ifndef NS_DESIGNATED_INITIALIZER
+#if __has_attribute(objc_designated_initializer)
+#define NS_DESIGNATED_INITIALIZER __attribute((objc_designated_initializer))
+#else
+#define NS_DESIGNATED_INITIALIZER
+#endif
+#endif
+```
+
 
 ## Literals
 
@@ -296,7 +321,7 @@ Constants are preferred over in-line string literals or numbers, as they allow f
 **For example:**
 
 ```objc
-static NSString * const NYTAboutViewControllerCompanyName = @"The New York Times Company";
+static NSString * const NYTAboutViewControllerCompanyName = @"Raumfeld Company";
 
 static const CGFloat NYTImageThumbnailHeight = 50.0;
 ```
@@ -304,7 +329,7 @@ static const CGFloat NYTImageThumbnailHeight = 50.0;
 **Not:**
 
 ```objc
-#define CompanyName @"The New York Times Company"
+#define CompanyName @"Raumfeld"
 
 #define thumbnailHeight 2
 ```
@@ -339,7 +364,7 @@ typedef NS_OPTIONS(NSUInteger, NYTAdCategory) {
 
 ## Private Properties
 
-Private properties should be declared in class extensions (anonymous categories) in the implementation file of a class. Named categories (such as `NYTPrivate` or `private`) should never be used unless extending another class.
+Private properties should be declared in class extensions (anonymous categories) in the implementation file of a class. Named categories (such as `RFPrivate`, `private`) should never be used unless extending another class.
 
 **For example:**
 
@@ -362,7 +387,7 @@ Image names should be named consistently to preserve organization and developer 
 * `RefreshBarButtonItem` / `RefreshBarButtonItem@2x` and `RefreshBarButtonItemSelected` / `RefreshBarButtonItemSelected@2x`
 * `ArticleNavigationBarWhite` / `ArticleNavigationBarWhite@2x` and `ArticleNavigationBarBlackSelected` / `ArticleNavigationBarBlackSelected@2x`.
 
-Images that are used for a similar purpose should be grouped in respective groups in an Images folder.
+Images that are used for a similar purpose should be grouped in respective groups in the image catalog.
 
 ## Booleans
 
