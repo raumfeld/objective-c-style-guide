@@ -36,6 +36,7 @@ Here are some of the documents from Apple that informed the style guide. If some
 * [Singletons](#singletons)
 * [Imports](#imports)
 * [Xcode Project](#xcode-project)
+* [Testing](#testing)
 
 ## Dot-Notation Syntax
 
@@ -480,6 +481,15 @@ When possible, always turn on "Treat Warnings as Errors" in the target's Build S
 We encourage you to write unit tests. Use dependency injection where possible and separate business logic from UI-Logic. Views and ViewControllers should contain as view logic as possible. The Datasource for UITableViews and UICollectionViews should be always extracted to an external, well tested class.
 
 Use code coverage tools to make sure you test as much as possible.
+
+### OCMock Style
+
+Prefer OCMock functions over OCMock methods, because OCMock specific
+code is better distinguishable from application code:
+
+:+1: `OCMStub([mock someMethod]).andReturn(anObject);`
+
+:-1: `[[[mock stub] andReturn:anObject] someMethod];`
 
 
 # Other Objective-C Style Guides
