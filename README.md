@@ -38,6 +38,7 @@ Here are some of the documents from Apple that informed the style guide. If some
 * [Class header file structure](#class-header-file-structure)
 * [Class implementation file structure](#class-implementation-file-structure)
 * [Xcode Project](#xcode-project)
+* [Code organization / App architecture](#code-organization)
 
 ## Dot-Notation Syntax
 
