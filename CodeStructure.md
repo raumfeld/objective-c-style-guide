@@ -140,7 +140,7 @@ You have asked yourself how an instance of `AModelLayerClass` will get its `zone
 
 As of now, we have not integrated a *DIC* into the app. We are planning to integrate the [Typhoon DIC](https://github.com/appsquickly/Typhoon).
 
-In order to get the implementation for the `RFZoneController` protocol we have call the static `instance`method on `RFZoneControllerImpl`:
+In order to get the implementation for the `RFZoneController` protocol we have to call the static `instance`method on `RFZoneControllerImpl`:
 
 ```objc
 @implementation AModelLayerClass
@@ -160,7 +160,7 @@ In order to get the implementation for the `RFZoneController` protocol we have c
 
 This couples `AModelLayerClass` to `RFZoneControllerImpl`. With the help of an DIC this coupling is removed.
 
-To still be able to isolate `AModelLayerClass` in your unit tests you simply have to mock the `instance` method of `RFZoneControllerImpl` to return a mock (with the help of [OCMock](http://ocmock.org):
+To still be able to isolate `AModelLayerClass` in your unit tests you simply have to mock the `instance` method of `RFZoneControllerImpl` to return a mock (with the help of [OCMock](http://ocmock.org)):
 
 ```objc
 id classMock = OCMClassMock([RFZoneControllerImpl class]);
