@@ -56,7 +56,7 @@ UIApplication.sharedApplication.delegate;
 ## Spacing
 
 * Indent using 4 spaces. Never indent with tabs. Be sure to set this preference in Xcode.
-* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the next line than the statement but and on a new line.
+* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the next line than the statement and end on a new line.
 
 **For example:**
 ```objc
@@ -117,7 +117,8 @@ When methods return an error parameter by reference, switch on the returned valu
 **For example:**
 ```objc
 NSError *error;
-if (![self trySomethingWithError:&error]) {
+if (![self trySomethingWithError:&error]) 
+{
     // Handle Error
 }
 ```
