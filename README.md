@@ -35,6 +35,8 @@ Here are some of the documents from Apple that informed the style guide. If some
 * [Booleans](#booleans)
 * [Singletons](#singletons)
 * [Imports](#imports)
+* [Class header file structure](#class-header-file-structure)
+* [Class implementation file structure](#class-implementation-file-structure)
 * [Xcode Project](#xcode-project)
 
 ## Dot-Notation Syntax
@@ -469,13 +471,15 @@ This will prevent [possible and sometimes prolific crashes](http://cocoasamurai.
 
 ## Imports
 
-If there is more than one import statement, group the statements [together](http://ashfurrow.com/blog/structuring-modern-objective-c). Commenting each group is optional.
+If there is more than one import statement, group the statements [together](http://ashfurrow.com/blog/structuring-modern-objective-c). Commenting each group is optional. Import system stuff first then your project's header.
 
 Note: For modules use the [@import](http://clang.llvm.org/docs/Modules.html#using-modules) syntax.
 
 ```objc
 // Frameworks
 @import QuartzCore;
+
+#import <tgmath.h>
 
 // Models
 #import "NYTUser.h"
@@ -484,6 +488,108 @@ Note: For modules use the [@import](http://clang.llvm.org/docs/Modules.html#usin
 #import "NYTButton.h"
 #import "NYTUserView.h"
 ```
+
+## Class header file structure
+
+The header file of a class should be structured as follows.
+
+1. Imports
+2. Forward declarations (use them as much as possible to speed up compilation)
+3. Constant declarations
+4. Delegate protocol definitions
+5. Class Declaration
+
+```objc
+
+@import Framework;
+
+#import <SystemImport.h>
+
+#import "ProjectImport.h"
+
+@class ClassForwardDeclaration
+@protocol ProtocolForwardDeclaration
+
+#pragma mark - constatnts
+
+extern NSString * const kConstant;
+
+#pragma mark - delegates
+
+@protocol RFAwesomeDelegate
+
+- (void)justDoIt;
+
+@end
+
+#pragma mark -
+
+@interface RFClass : NSObject <RFSomeProtocol>
+
+//properties
+
+//methods
+
+@end
+
+```
+
+## Class implementation file structure
+
+The implementation file of a class should be structured as follows.
+
+1. Imports
+2. Constant definitions
+3. Private declarations
+4. Implementation
+	5. @synthesize
+	6. initializers
+	7. dealloc
+	8. public method implementations
+	9. private method implementations
+
+```objc
+#import <SystemStuff.h>
+
+#import "ProjectStuff.h"
+
+#pragma mark - constants
+
+NSString * const kConstant = @"OMFG";
+
+#pragma mark - private
+
+@interface RFClass ()
+//private properties
+@end
+
+#pragma mark - 
+
+@implementation RFClass
+
+@synthesize property = _property;
+
+- (id)init
+{
+
+}
+
+- (void)dealloc
+{
+
+}
+
+#pragma mark - public
+
+//implementations for public methods
+
+#pragma mark - private
+
+//implementations for private methods
+
+@end
+```
+
 
 ## Xcode project
 
