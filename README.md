@@ -412,7 +412,9 @@ This allows for more consistency across files and greater visual clarity.
 **For example:**
 
 ```objc
-if (!someObject) {
+if (!someObject) 
+{
+
 }
 ```
 
