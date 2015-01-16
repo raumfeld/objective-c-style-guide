@@ -35,7 +35,10 @@ Here are some of the documents from Apple that informed the style guide. If some
 * [Booleans](#booleans)
 * [Singletons](#singletons)
 * [Imports](#imports)
+* [Class header file structure](#class-header-file-structure)
+* [Class implementation file structure](#class-implementation-file-structure)
 * [Xcode Project](#xcode-project)
+* [Code organization / App architecture](#code-organization)
 
 ## Dot-Notation Syntax
 
@@ -56,7 +59,7 @@ UIApplication.sharedApplication.delegate;
 ## Spacing
 
 * Indent using 4 spaces. Never indent with tabs. Be sure to set this preference in Xcode.
-* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the next line than the statement but and on a new line.
+* Method braces and other braces (`if`/`else`/`switch`/`while` etc.) always open on the next line than the statement and end on a new line.
 
 **For example:**
 ```objc
@@ -78,7 +81,8 @@ Conditional bodies should always use braces even when a conditional body could b
 
 **For example:**
 ```objc
-if (!error) {
+if (!error) 
+{
     return success;
 }
 ```
@@ -116,7 +120,8 @@ When methods return an error parameter by reference, switch on the returned valu
 **For example:**
 ```objc
 NSError *error;
-if (![self trySomethingWithError:&error]) {
+if (![self trySomethingWithError:&error]) 
+{
     // Handle Error
 }
 ```
@@ -222,7 +227,19 @@ id varnm;
 
 When they are needed, comments should be used to explain **why** a particular piece of code does something. Any comments that are used must be kept up-to-date or deleted.
 
-Block comments should generally be avoided, as code should be as self-documenting as possible, with only the need for intermittent, few-line explanations. This does not apply to those comments used to generate documentation.
+```objc
+//this is a one line comment
+```
+
+```objc
+/*
+ * Use a block comment if one line is not
+ * sufficient to explain yourself.
+ *
+ * If you need more than three lines,
+ * think about in how far your code can be simplified.
+ */
+```
 
 ## init and dealloc
 
@@ -398,7 +415,9 @@ This allows for more consistency across files and greater visual clarity.
 **For example:**
 
 ```objc
-if (!someObject) {
+if (!someObject) 
+{
+
 }
 ```
 
@@ -453,13 +472,15 @@ This will prevent [possible and sometimes prolific crashes](http://cocoasamurai.
 
 ## Imports
 
-If there is more than one import statement, group the statements [together](http://ashfurrow.com/blog/structuring-modern-objective-c). Commenting each group is optional.
+If there is more than one import statement, group the statements [together](http://ashfurrow.com/blog/structuring-modern-objective-c). Commenting each group is optional. Import system stuff first then your project's header.
 
 Note: For modules use the [@import](http://clang.llvm.org/docs/Modules.html#using-modules) syntax.
 
 ```objc
 // Frameworks
 @import QuartzCore;
+
+#import <tgmath.h>
 
 // Models
 #import "NYTUser.h"
@@ -469,11 +490,117 @@ Note: For modules use the [@import](http://clang.llvm.org/docs/Modules.html#usin
 #import "NYTUserView.h"
 ```
 
+## Class header file structure
+
+The header file of a class should be structured as follows.
+
+1. Imports
+2. Forward declarations (use them as much as possible to speed up compilation)
+3. Constant declarations
+4. Delegate protocol definitions
+5. Class Declaration
+
+```objc
+
+@import Framework;
+
+#import <SystemImport.h>
+
+#import "ProjectImport.h"
+
+@class ClassForwardDeclaration
+@protocol ProtocolForwardDeclaration
+
+#pragma mark - constatnts
+
+extern NSString * const kConstant;
+
+#pragma mark - delegates
+
+@protocol RFAwesomeDelegate
+
+- (void)justDoIt;
+
+@end
+
+#pragma mark -
+
+@interface RFClass : NSObject <RFSomeProtocol>
+
+//properties
+
+//methods
+
+@end
+
+```
+
+## Class implementation file structure
+
+The implementation file of a class should be structured as follows.
+
+1. Imports
+2. Constant definitions
+3. Private declarations
+4. Implementation
+	5. @synthesize
+	6. initializers
+	7. dealloc
+	8. public method implementations
+	9. private method implementations
+
+```objc
+#import <SystemStuff.h>
+
+#import "ProjectStuff.h"
+
+#pragma mark - constants
+
+NSString * const kConstant = @"OMFG";
+
+#pragma mark - private
+
+@interface RFClass ()
+//private properties
+@end
+
+#pragma mark - 
+
+@implementation RFClass
+
+@synthesize property = _property;
+
+- (id)init
+{
+
+}
+
+- (void)dealloc
+{
+
+}
+
+#pragma mark - public
+
+//implementations for public methods
+
+#pragma mark - private
+
+//implementations for private methods
+
+@end
+```
+
+
 ## Xcode project
 
 The physical files should be kept in sync with the Xcode project files in order to avoid file sprawl. Any Xcode groups created should be reflected by folders in the filesystem. Code should be grouped not only by type, but also by feature for greater clarity.
 
 When possible, always turn on "Treat Warnings as Errors" in the target's Build Settings and enable as many [additional warnings](http://boredzo.org/blog/archives/2009-11-07/warnings) as possible. If you need to ignore a specific warning, use [Clang's pragma feature](http://clang.llvm.org/docs/UsersManual.html#controlling-diagnostics-via-pragmas).
+
+###Code organization
+
+[This document](CodeStructure.md) describes how we organize our code.
 
 ## Testing
 
