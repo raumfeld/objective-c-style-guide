@@ -2,6 +2,16 @@
 
 In this document we describe how our code base is organized. Since we introduced this guide to an existing code base it is very likely that you will encounter structures that do not comply with rules presented here. If you find code that does not correspond to these rules, please refactor it!
 
+## Table of Contents
+
+* [Folder Structure](#folder-structure)
+* [App Architecture](#app-architecture)
+	* [View Layer](#view-layer) 
+	* [ViewController Layer](#viewcontroller-layer)
+	* [Model Layer](#model-layer)
+	* [Controller Layer](#controller-layer)
+	    * [Dependency Injection](#dependency-injection)
+
 ##Folder Structure
 
 The code for the iOS ***Raumfeld Control*** is organized by topics such as *Zones*, *Content*,  *Playback*, or *UPnP*:
