@@ -1,4 +1,4 @@
-This document describes how to use our dependency injection container a.k.a. `RFFactory`. Furthermore, it is describes [how to make your test cases aware of `RFFactory`](#rftestcase). Finally, you are told how to [add new components to `RFFactory`](#adding-new-components).
+This document describes how to use our dependency injection container a.k.a. `RFFactory`. Furthermore, it describes how to [add new components to `RFFactory`](#adding-new-components) and how to [make your test cases aware of `RFFactory`](#rftestcase).
 
 #RFFactory
 
@@ -27,14 +27,12 @@ Which components can be retrieved with `RFFactory` is described by the class `RF
 
 - (id<RFZoneController>)zoneController;
 
-- (RFNoticeManager *)noticeManager;
-
-- (ContentCache *)contentCache;
+//...
 
 @end
 ```
 
-The header of `RFAssembly` describes which components are managed by  `RFFactory`. "Managed" means that the `TyphoonComponentFactory` instantiates those objects and injects their dependencies.
+The header of `RFAssembly` describes which components are managed by  `RFFactory`. "Managed" means that the `TyphoonComponentFactory` instantiates those objects and wires them together (injects their dependencies).
 
 For example, the `ControlContext` must be instantiated with an instance of `WebService` and `RFZoneController`:
 
@@ -42,7 +40,7 @@ For example, the `ControlContext` must be instantiated with an instance of `WebS
 @interface ControlContext
 
 - (instancetype) initWithWebService: (WebService *) webService
-                     zoneController: (id<RFZoneController>)zoneController
+                     zoneController: (id<RFZoneController>)zoneController NS_DESIGNATED_INITIALIZER;
                      
 @end
 ```
@@ -79,6 +77,111 @@ TyphoonComponentFactory *factory = [[TyphoonBlockComponentFactory alloc]
 [factory makeDefault];
 ```
 
+##Using RFFactory
+
+As shown above, `RFFactory` is very handy to inject dependencies into your code:
+
+```objc
+ControlContext *controlContext = [RFFactory controlContext];
+```
+
+However, it is preferred to declare dependencies in your class' designated initializer and add your class to `RFAssembly` (see [Adding New Components](#adding-new-components) for a detailed example) instead of using `RFFactory`.
+
+Avoid doing this:
+
+```objc
+@implementation YourClass
+
+- (instancetype)init
+{
+	//...
+		
+	self.controlContext = [RFFactory controlContext];
+		
+	return self;
+}
+
+@end
+```
+
+Instead, do this:
+
+```objc
+@implementation YourClass
+
+- (instancetype)initWithControlContext:(ControlContext*)controlContext 
+{
+	//...
+		
+	self.controlContext = controlContext;
+		
+	return self;
+}
+
+@end
+```
+
+This has the benefit that your class' dependencies are clearly communicated and do not disappear somewhere in its implementation. Another benefit is that your class can be instantiated and wired to other objects by `RFFactory`.
+
+`RFFactory` should be used as little as possible. Ideally, we want to get the root of an object graph from `RFFactory` and let it instantiate and wire the rest of the object graph. But since we are introducing it to an existing code base, we have to be pragmatic.
+
+##Adding New Components
+
+There are two steps that are required in order to make a new component available through `RFFactory`:
+
+1. Add a new method to `RFAssembly`
+2. Mock the component in `RFTestCase` `injectMocks`
+
+If you have done this, `RFFactrory` will provide other components with the production implementation that you specified in `RFAssembly` and with a mock in test cases that inherit from `RFTestCase`.
+
+###Example
+
+1. Declare a dependency in your class' designated initializer and add your class to the `RFAssembly`:
+	
+	```objc
+	@interface YourClass
+	- (instancetype)initWithControlContext:(ControlContext*)controlContext NS_DESIGNATED_INITIALIZER;
+	@end
+	```
+	
+	The declaration in the desiganted initializer is the prefered way to inject dependencies. This allows us to clearly communicate a class' dependencies.
+	
+	```objc
+	@interface RFAssembly
+	- (YourClass *)yourClass;
+	@end
+	
+	@implementation RFAssembly
+	
+	- (YourClass *)yourClass
+	{
+    	return [TyphoonDefinition withClass:[YourClass class] configuration:^(TyphoonDefinition *definition) {
+        	
+        	definition.scope = TyphoonScopeSingleton;
+        
+        	[definition useInitializer:@selector(initWithControlContext:)
+                            parameters:^(TyphoonMethod *initializer) {
+                            
+				[initializer injectParameterWith:[self controlContext]];
+                            
+			}];
+    	}];
+	}
+	
+	@end
+	```
+	
+2. Mock your class in `RFTestCase` `injectMocks`
+
+	```objc
+	- (void)injectMocks:(TyphoonComponentFactory *)assembly
+	{
+		[self     mockClass:[YourClass class]
+                 inAssembly:assembly
+              usingSelector:@selector(yourClass)];
+	}
+	```
+
 #RFTestCase
 
 `RFTestCase` must be the base class of every new test case. It provides a `factory` that provides mocks for all components specified by `RFAssembly`.
@@ -113,12 +216,3 @@ This allows us to communicate on which components the SUT depends upon. In the e
 id webServiceMock = [self.factory webService];
 [[webServiceMock expect] resume];
 ```
-
-#Adding New Components
-
-There are two steps that are required in order to make a new component available through `RFFactory`:
-
-1. Add a new method to `RFAssembly`
-2. Mock the component in `RFTestCase` `injectMocks`
-
-If you have done this, `RFFactrory` will provide other components with the production implementation that you specified in `RFAssembly` and with a mock in test case that inherit from `RFTestCase`.
